@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>展哥電路實驗室01：LED二極體的串並聯</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --board-bg: #142a1f;
+      --board-wood: #4a2711;
+      --chalk-white: #f5f8f6;
+      --chalk-yellow: #fff566;
+      --chalk-green: #52ff90;
+      --chalk-blue: #38d8ff;
+      --chalk-red: #ff4d6d;
+      --chalk-orange: #ffab40;
+      --chalk-purple: #d1a3ff;
+      --chalk-pink: #ff4081;
+      --chalk-sub: #cfd8dc;
+      --wire-color: rgba(245, 248, 246, 0.9);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: #0a130e;
+      font-family: 'Noto Sans TC', sans-serif;
+      color: var(--chalk-white);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 8px;
+    }
+
+    .blackboard-frame {
+      width: 100%;
+      max-width: 1320px;
+      background: var(--board-wood);
+      padding: 12px;
+      border-radius: 6px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.85), inset 0 0 12px rgba(0,0,0,0.7);
+    }
+
+    .blackboard {
+      background-color: var(--board-bg);
+      background-image: 
+        radial-gradient(circle at 50% 40%, rgba(255,255,255,0.04) 0%, transparent 80%),
+        radial-gradient(circle at 10% 20%, rgba(0,0,0,0.3) 0%, transparent 60%),
+        radial-gradient(circle at 90% 80%, rgba(0,0,0,0.3) 0%, transparent 60%);
+      border: 2px solid #1c382a;
+      border-radius: 4px;
+      padding: 18px 16px 14px 16px;
+      position: relative;
+      box-shadow: inset 0 0 80px rgba(0,0,0,0.75);
+    }
+
+    .board-header {
+      text-align: center;
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .title-line-1 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--chalk-orange);
+      text-shadow: 0 0 6px rgba(255, 171, 64, 0.4), 2px 2px 4px rgba(0,0,0,0.8);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+    }
+
+    .title-line-2 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 1.8px;
+      color: var(--chalk-purple);
+      text-shadow: 0 0 6px rgba(209, 163, 255, 0.45);
+      white-space: nowrap;
+    }
+
+    .sparkle {
+      color: var(--chalk-orange);
+      font-size: 1.2rem;
+      filter: drop-shadow(0 0 4px rgba(255, 171, 64, 0.7));
+    }
+
+    .chalk-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto auto;
+      position: relative;
+    }
+
+    .chalk-grid::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 33.333%;
+      width: 0;
+      border-left: 1.5px dashed rgba(255,255,255,0.3);
+      pointer-events: none;
+    }
+    .chalk-grid::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 66.666%;
+      width: 0;
+      border-left: 1.5px dashed rgba(255,255,255,0.3);
+      pointer-events: none;
+    }
+    .grid-h-line {
+      grid-column: 1 / -1;
+      height: 0;
+      border-top: 1.5px dashed rgba(255,255,255,0.3);
+      margin: 8px 0 10px 0;
+      pointer-events: none;
+    }
+
+    .cell-q1 { grid-column: 3; grid-row: 1; }
+    .cell-q2 { grid-column: 3; grid-row: 3; }
+    .cell-q3 { grid-column: 2; grid-row: 1; }
+    .cell-q4 { grid-column: 2; grid-row: 3; }
+    .cell-q5 { grid-column: 1; grid-row: 1; }
+    .cell-q6 { grid-column: 1; grid-row: 3; }
+
+    @media (max-width: 900px) {
+      .blackboard { padding: 14px 10px; }
+      .title-line-1 { font-size: 1.25rem; gap: 6px; }
+      .title-line-2 { font-size: 1.05rem; }
+      .chalk-grid { grid-template-columns: 1fr; }
+      .chalk-grid::before, .chalk-grid::after, .grid-h-line { display: none; }
+      .cell-q1 { grid-column: 1; grid-row: 1; border-bottom: 1.5px dashed rgba(255,255,255,0.25); padding-bottom: 14px; }
+      .cell-q2 { grid-column: 1; grid-row: 2; border-bottom: 1.5px dashed rgba(255,255,255,0.25); padding-bottom: 14px; }
+      .cell-q3 { grid-column: 1; grid-row: 3; border-bottom: 1.5px dashed rgba(255,255,255,0.25); padding-bottom: 14px; }
+      .cell-q4 { grid-column: 1; grid-row: 4; border-bottom: 1.5px dashed rgba(255,255,255,0.25); padding-bottom: 14px; }
+      .cell-q5 { grid-column: 1; grid-row: 5; border-bottom: 1.5px dashed rgba(255,255,255,0.25); padding-bottom: 14px; }
+      .cell-q6 { grid-column: 1; grid-row: 6; border-bottom: 1.5px dashed rgba(255,255,255,0.25); padding-bottom: 14px; }
+    }
+
+    .q-box {
+      padding: 6px 12px 10px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .q-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--chalk-white);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .svg-container {
+      width: 100%;
+      height: 165px;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .wire {
+      stroke: var(--wire-color);
+      stroke-width: 2.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      filter: drop-shadow(0 0 1px rgba(255,255,255,0.35));
+      transition: stroke 0.3s ease, filter 0.3s ease;
+    }
+
+    /* 第6題電流通過時的粉紅色電線樣式 */
+    .wire-current-pink {
+      stroke: var(--chalk-pink) !important;
+      stroke-width: 3.4 !important;
+      filter: drop-shadow(0 0 6px #ff4081) drop-shadow(0 0 12px rgba(255,64,129,0.8)) !important;
+    }
+
+    .chalk-txt {
+      font-family: 'Noto Sans TC', sans-serif;
+      fill: var(--chalk-white);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .chalk-txt-sub { fill: var(--chalk-sub); }
+    .chalk-pin {
+      font-size: 11px;
+      fill: #b0bec5;
+    }
+
+    .pol-btn-group {
+      cursor: pointer;
+    }
+    .pol-circle {
+      fill: #193427;
+      stroke: var(--chalk-white);
+      stroke-width: 2;
+      transition: all 0.2s ease;
+    }
+    .pol-btn-group:hover .pol-circle {
+      stroke: #ffffff;
+      filter: drop-shadow(0 0 6px #ffffff);
+    }
+    .pol-text {
+      font-size: 15px;
+      font-weight: 700;
+      fill: var(--chalk-white);
+      text-anchor: middle;
+      dominant-baseline: central;
+      pointer-events: none;
+    }
+
+    .led-core {
+      stroke-width: 2.2;
+      stroke: #ffffff;
+      transition: all 0.25s ease;
+    }
+
+    .glow-red {
+      fill: #ff2a51 !important;
+      stroke: #ffffff !important;
+      filter: drop-shadow(0 0 6px #ff1744) drop-shadow(0 0 16px rgba(255, 23, 68, 0.95)) drop-shadow(0 0 30px rgba(255, 82, 82, 0.6)) !important;
+    }
+    .glow-blue {
+      fill: #00e5ff !important;
+      stroke: #ffffff !important;
+      filter: drop-shadow(0 0 6px #00e5ff) drop-shadow(0 0 16px rgba(0, 229, 255, 0.95)) drop-shadow(0 0 30px rgba(64, 196, 255, 0.6)) !important;
+    }
+    .glow-yellow {
+      fill: #ffea00 !important;
+      stroke: #ffffff !important;
+      filter: drop-shadow(0 0 6px #ffd600) drop-shadow(0 0 16px rgba(255, 234, 0, 0.95)) drop-shadow(0 0 30px rgba(255, 255, 0, 0.6)) !important;
+    }
+    .glow-green {
+      fill: #00ff73 !important;
+      stroke: #ffffff !important;
+      filter: drop-shadow(0 0 6px #00e676) drop-shadow(0 0 16px rgba(0, 230, 118, 0.95)) drop-shadow(0 0 30px rgba(105, 240, 174, 0.6)) !important;
+    }
+
+    .led-off {
+      fill: #223a2e !important;
+      stroke: rgba(255,255,255,0.35) !important;
+      filter: none !important;
+    }
+
+    .slider-wrap {
+      margin-top: 2px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1px;
+    }
+
+    .volt-num {
+      font-family: 'Caveat', cursive, sans-serif;
+      font-size: 1.18rem;
+      color: var(--chalk-white);
+      letter-spacing: 0.5px;
+      height: 22px;
+    }
+
+    .slider-inner {
+      width: 82%;
+      display: flex;
+      align-items: center;
+    }
+
+    .range-chalk {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 3px;
+      border: 1px dashed rgba(255,255,255,0.55);
+      outline: none;
+      margin: 4px 0;
+    }
+    .range-chalk::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid #5c341b;
+      cursor: pointer;
+      box-shadow: 0 0 5px rgba(0,0,0,0.6);
+    }
+
+    .range-minmax {
+      display: flex;
+      width: 82%;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--chalk-sub);
+    }
+
+    .bottom-note {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--chalk-white);
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ==================== 延伸學習區樣式 ==================== */
+    .extension-section {
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 2px dashed rgba(255, 255, 255, 0.4);
+    }
+
+    .ext-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .ext-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--chalk-yellow);
+      letter-spacing: 1.5px;
+      text-shadow: 0 0 4px rgba(255, 245, 102, 0.4);
+      white-space: nowrap;
+    }
+
+    /* 入門補充：實體 LED 與符號銜接卡片 */
+    .intro-banner {
+      background: rgba(18, 44, 32, 0.75);
+      border: 2px dashed var(--chalk-green);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    .intro-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--chalk-green);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px dashed rgba(255,255,255,0.25);
+      padding-bottom: 6px;
+    }
+
+    .intro-body {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 20px;
+      align-items: center;
+    }
+
+    @media (max-width: 820px) {
+      .intro-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .intro-svg-box {
+      width: 100%;
+      height: 210px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .intro-text-box {
+      font-size: 0.9rem;
+      line-height: 1.75;
+      color: #e0e0e0;
+    }
+
+    .intro-highlight {
+      color: var(--chalk-yellow);
+      font-weight: 700;
+    }
+
+    .ext-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .ext-grid {
+        grid-template-columns: 1fr;
+      }
+      .ext-title {
+        font-size: 1.15rem;
+      }
+    }
+
+    .ext-card {
+      background: rgba(14, 33, 24, 0.55);
+      border: 1.5px dashed rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .ext-card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--chalk-orange);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px dashed rgba(255,255,255,0.2);
+      padding-bottom: 6px;
+    }
+
+    .ext-content {
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: #e0e0e0;
+    }
+
+    .ext-danger {
+      color: var(--chalk-red);
+      font-weight: 700;
+    }
+
+    /* I-V 圖形區域 */
+    .iv-graph-box {
+      width: 100%;
+      height: 175px;
+      background: rgba(8, 20, 14, 0.6);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      padding: 6px;
+    }
+
+    .ext-formula-box {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-top: 4px;
+      text-align: center;
+      font-family: 'Caveat', cursive, sans-serif;
+      font-size: 1.25rem;
+      color: var(--chalk-yellow);
+      letter-spacing: 1px;
+    }
+
+    .ext-tip {
+      font-size: 0.82rem;
+      color: var(--chalk-sub);
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="blackboard-frame">
+  <div class="blackboard">
+
+    <!-- 頂部主標題：橘色 + 紫色 -->
+    <div class="board-header">
+      <div class="title-line-1">
+        <span class="sparkle">✦</span>
+        展哥電路實驗室01
+        <span class="sparkle">✦</span>
+      </div>
+      <div class="title-line-2">LED二極體的串並聯</div>
+    </div>
+
+    <!-- 六題網格 -->
+    <div class="chalk-grid">
+
+      <!-- ==================== 第 1 題（右上角）：並聯紅藍 LED ==================== -->
+      <div class="q-box cell-q1">
+        <div class="q-title">【第1題】並聯紅藍 LED</div>
+        <div class="svg-container">
+          <svg viewBox="0 0 340 180" id="svg1">
+            <text x="50" y="32" class="chalk-txt chalk-txt-sub" text-anchor="middle">點擊切換極性</text>
+            <text x="50" y="46" class="chalk-txt chalk-txt-sub" text-anchor="middle">↔</text>
+
+            <path d="M 50 90 L 110 90 L 145 45 L 195 45 L 230 90 L 290 90" class="wire" />
+            <path d="M 110 90 L 145 135 L 195 135 L 230 90" class="wire" />
+
+            <!-- 紅 LED (上：左長右短) -->
+            <polygon points="175,45 155,34 155,56" class="led-core" id="led-1-red" fill="#ff4d6d" />
+            <line x1="175" y1="34" x2="175" y2="56" stroke="#fff" stroke-width="2.2" />
+            <text x="165" y="24" class="chalk-txt" fill="#ff6b8b" font-weight="bold">紅</text>
+            <text x="142" y="38" class="chalk-pin">長</text>
+            <text x="185" y="38" class="chalk-pin">短</text>
+
+            <!-- 藍 LED (下：左長右短) -->
+            <polygon points="175,135 155,124 155,146" class="led-core" id="led-1-blue" fill="#38d8ff" />
+            <line x1="175" y1="124" x2="175" y2="146" stroke="#fff" stroke-width="2.2" />
+            <text x="165" y="162" class="chalk-txt" fill="#38d8ff" font-weight="bold">藍</text>
+            <text x="142" y="148" class="chalk-pin">長</text>
+            <text x="185" y="148" class="chalk-pin">短</text>
+
+            <g class="pol-btn-group" onclick="togglePolarity(1)">
+              <circle cx="50" cy="90" r="16" class="pol-circle" />
+              <text x="50" y="90" class="pol-text" id="pol-1-left">＋</text>
+            </g>
+            <g class="pol-btn-group" onclick="togglePolarity(1)">
+              <circle cx="290" cy="90" r="16" class="pol-circle" />
+              <text x="290" y="90" class="pol-text" id="pol-1-right">－</text>
+            </g>
+          </svg>
+        </div>
+        <div class="slider-wrap">
+          <div class="volt-num" id="val-1">6.0V</div>
+          <div class="slider-inner">
+            <input type="range" min="0" max="10" step="0.1" value="6.0" class="range-chalk" id="range-1" oninput="handleVolt(1)">
+          </div>
+          <div class="range-minmax"><span>0.0V</span><span>10.0V</span></div>
+        </div>
+        <div class="bottom-note" id="note-1">僅紅燈亮（紅燈箝位使藍燈不亮）</div>
+      </div>
+
+      <!-- ==================== 第 3 題（中上方）：並聯黃綠 LED ==================== -->
+      <div class="q-box cell-q3">
+        <div class="q-title">【第3題】並聯黃綠 LED</div>
+        <div class="svg-container">
+          <svg viewBox="0 0 340 180" id="svg3">
+            <text x="50" y="32" class="chalk-txt chalk-txt-sub" text-anchor="middle">點擊切換極性</text>
+            <text x="50" y="46" class="chalk-txt chalk-txt-sub" text-anchor="middle">↔</text>
+
+            <path d="M 50 90 L 110 90 L 145 45 L 195 45 L 230 90 L 290 90" class="wire" />
+            <path d="M 110 90 L 145 135 L 195 135 L 230 90" class="wire" />
+
+            <!-- 黃 LED (上：左長右短) -->
+            <polygon points="175,45 155,34 155,56" class="led-core" id="led-3-yellow" fill="#fff566" />
+            <line x1="175" y1="34" x2="175" y2="56" stroke="#fff" stroke-width="2.2" />
+            <text x="165" y="24" class="chalk-txt" fill="#fff566" font-weight="bold">黃</text>
+            <text x="142" y="38" class="chalk-pin">長</text>
+            <text x="185" y="38" class="chalk-pin">短</text>
+
+            <!-- 綠 LED (下：左長右短) -->
+            <polygon points="175,135 155,124 155,146" class="led-core" id="led-3-green" fill="#52ff90" />
+            <line x1="175" y1="124" x2="175" y2="146" stroke="#fff" stroke-width="2.2" />
+            <text x="165" y="162" class="chalk-txt" fill="#52ff90" font-weight="bold">綠</text>
+            <text x="142" y="148" class="chalk-pin">長</text>
+            <text x="185" y="148" class="chalk-pin">短</text>
+
+            <g class="pol-btn-group" onclick="togglePolarity(3)">
+              <circle cx="50" cy="90" r="16" class="pol-circle" />
+              <text x="50" y="90" class="pol-text" id="pol-3-left">＋</text>
+            </g>
+            <g class="pol-btn-group" onclick="togglePolarity(3)">
+              <circle cx="290" cy="90" r="16" class="pol-circle" />
+              <text x="290" y="90" class="pol-text" id="pol-3-right">－</text>
+            </g>
+          </svg>
+        </div>
+        <div class="slider-wrap">
+          <div class="volt-num" id="val-3">6.0V</div>
+          <div class="slider-inner">
+            <input type="range" min="0" max="10" step="0.1" value="6.0" class="range-chalk" id="range-3" oninput="handleVolt(3)">
+          </div>
+          <div class="range-minmax"><span>0.0V</span><span>10.0V</span></div>
+        </div>
+        <div class="bottom-note" id="note-3">黃燈需 > 2.1V、綠燈需 > 2.2V（皆跨過門檻發光）</div>
+      </div>
+
+      <!-- ==================== 第 5 題（左上角）：反向並聯 LED ==================== -->
+      <div class="q-box cell-q5">
+        <div class="q-title">【第5題】反向並聯 LED</div>
+        <div class="svg-container">
+          <svg viewBox="0 0 340 180" id="svg5">
+            <text x="50" y="32" class="chalk-txt chalk-txt-sub" text-anchor="middle">點擊切換極性</text>
+            <text x="50" y="46" class="chalk-txt chalk-txt-sub" text-anchor="middle">↔</text>
+
+            <path d="M 50 90 L 105 90 L 140 50 L 205 50 L 240 90 L 290 90" class="wire" />
+            <path d="M 105 90 L 140 130 L 205 130 L 240 90" class="wire" />
+
+            <!-- A 燈 (上：紅燈，右長左短，右+導通) -->
+            <polygon points="160,50 180,40 180,60" class="led-core" id="led-5-a" fill="#ff4d6d" />
+            <line x1="160" y1="40" x2="160" y2="60" stroke="#fff" stroke-width="2.2" />
+            <text x="142" y="38" class="chalk-pin">短</text>
+            <text x="195" y="38" class="chalk-pin">長</text>
+            <text x="170" y="30" class="chalk-txt" fill="#ff6b8b" font-weight="bold">A(紅)</text>
+
+            <!-- B 燈 (下：綠燈，左長右短，左+導通) -->
+            <polygon points="180,130 160,120 160,140" class="led-core" id="led-5-b" fill="#52ff90" />
+            <line x1="180" y1="120" x2="180" y2="140" stroke="#fff" stroke-width="2.2" />
+            <text x="142" y="146" class="chalk-pin">長</text>
+            <text x="195" y="146" class="chalk-pin">短</text>
+            <text x="170" y="156" class="chalk-txt" fill="#52ff90" font-weight="bold">B(綠)</text>
+
+            <g class="pol-btn-group" onclick="togglePolarity(5)">
+              <circle cx="50" cy="90" r="16" class="pol-circle" />
+              <text x="50" y="90" class="pol-text" id="pol-5-left">－</text>
+            </g>
+            <g class="pol-btn-group" onclick="togglePolarity(5)">
+              <circle cx="290" cy="90" r="16" class="pol-circle" />
+              <text x="290" y="90" class="pol-text" id="pol-5-right">＋</text>
+            </g>
+          </svg>
+        </div>
+        <div class="slider-wrap">
+          <div class="volt-num" id="val-5">6.0V</div>
+          <div class="slider-inner">
+            <input type="range" min="0" max="10" step="0.1" value="6.0" class="range-chalk" id="range-5" oninput="handleVolt(5)">
+          </div>
+          <div class="range-minmax"><span>0.0V</span><span>10.0V</span></div>
+        </div>
+        <div class="bottom-note" id="note-5">紅燈需 > 2.0V、綠燈需 > 2.2V（極性輪流導通）</div>
+      </div>
+
+      <!-- 分隔線 -->
+      <div class="grid-h-line"></div>
+
+      <!-- ==================== 第 2 題（右下角）：串聯紅藍 LED ==================== -->
+      <div class="q-box cell-q2">
+        <div class="q-title">【第2題】串聯紅藍 LED</div>
+        <div class="svg-container">
+          <svg viewBox="0 0 340 180" id="svg2">
+            <text x="50" y="32" class="chalk-txt chalk-txt-sub" text-anchor="middle">點擊切換極性</text>
+            <text x="50" y="46" class="chalk-txt chalk-txt-sub" text-anchor="middle">↔</text>
+
+            <path d="M 50 90 L 110 90 L 130 90 L 175 90 L 200 90 L 245 90 L 290 90" class="wire" />
+
+            <!-- 藍燈 (左：左長右短) -->
+            <polygon points="150,90 130,80 130,100" class="led-core" id="led-2-blue" fill="#38d8ff" />
+            <line x1="150" y1="80" x2="150" y2="100" stroke="#fff" stroke-width="2.2" />
+            <text x="140" y="68" class="chalk-txt" fill="#38d8ff" font-weight="bold">藍</text>
+            <text x="115" y="85" class="chalk-pin">長</text>
+            <text x="160" y="85" class="chalk-pin">短</text>
+
+            <!-- 紅燈 (右：左長右短) -->
+            <polygon points="225,90 205,80 205,100" class="led-core" id="led-2-red" fill="#ff4d6d" />
+            <line x1="225" y1="80" x2="225" y2="100" stroke="#fff" stroke-width="2.2" />
+            <text x="215" y="68" class="chalk-txt" fill="#ff6b8b" font-weight="bold">紅</text>
+            <text x="190" y="85" class="chalk-pin">長</text>
+            <text x="235" y="85" class="chalk-pin">短</text>
+
+            <g class="pol-btn-group" onclick="togglePolarity(2)">
+              <circle cx="50" cy="90" r="16" class="pol-circle" />
+              <text x="50" y="90" class="pol-text" id="pol-2-left">＋</text>
+            </g>
+            <g class="pol-btn-group" onclick="togglePolarity(2)">
+              <circle cx="290" cy="90" r="16" class="pol-circle" />
+              <text x="290" y="90" class="pol-text" id="pol-2-right">－</text>
+            </g>
+          </svg>
+        </div>
+        <div class="slider-wrap">
+          <div class="volt-num" id="val-2">6.0V</div>
+          <div class="slider-inner">
+            <input type="range" min="0" max="10" step="0.1" value="6.0" class="range-chalk" id="range-2" oninput="handleVolt(2)">
+          </div>
+          <div class="range-minmax"><span>0.0V</span><span>10.0V</span></div>
+        </div>
+        <div class="bottom-note" id="note-2">藍、紅皆亮（若電壓夠高）</div>
+      </div>
+
+      <!-- ==================== 第 4 題（中下方）：串聯黃綠 LED ==================== -->
+      <div class="q-box cell-q4">
+        <div class="q-title">【第4題】串聯黃綠 LED</div>
+        <div class="svg-container">
+          <svg viewBox="0 0 340 180" id="svg4">
+            <text x="50" y="32" class="chalk-txt chalk-txt-sub" text-anchor="middle">點擊切換極性</text>
+            <text x="50" y="46" class="chalk-txt chalk-txt-sub" text-anchor="middle">↔</text>
+
+            <path d="M 50 90 L 110 90 L 130 90 L 175 90 L 200 90 L 245 90 L 290 90" class="wire" />
+
+            <!-- 綠燈 (左側元件：朝左導通，右長左短) -->
+            <polygon points="130,90 150,80 150,100" class="led-core" id="led-4-green" fill="#52ff90" />
+            <line x1="130" y1="80" x2="130" y2="100" stroke="#fff" stroke-width="2.2" />
+            <text x="140" y="68" class="chalk-txt" fill="#52ff90" font-weight="bold">綠</text>
+            <text x="115" y="85" class="chalk-pin">短</text>
+            <text x="160" y="85" class="chalk-pin">長</text>
+
+            <!-- 黃燈 (右側元件：朝左導通，右長左短) -->
+            <polygon points="205,90 225,80 225,100" class="led-core" id="led-4-yellow" fill="#fff566" />
+            <line x1="205" y1="80" x2="205" y2="100" stroke="#fff" stroke-width="2.2" />
+            <text x="215" y="68" class="chalk-txt" fill="#fff566" font-weight="bold">黃</text>
+            <text x="190" y="85" class="chalk-pin">短</text>
+            <text x="235" y="85" class="chalk-pin">長</text>
+
+            <g class="pol-btn-group" onclick="togglePolarity(4)">
+              <circle cx="50" cy="90" r="16" class="pol-circle" />
+              <text x="50" y="90" class="pol-text" id="pol-4-left">－</text>
+            </g>
+            <g class="pol-btn-group" onclick="togglePolarity(4)">
+              <circle cx="290" cy="90" r="16" class="pol-circle" />
+              <text x="290" y="90" class="pol-text" id="pol-4-right">＋</text>
+            </g>
+          </svg>
+        </div>
+        <div class="slider-wrap">
+          <div class="volt-num" id="val-4">6.0V</div>
+          <div class="slider-inner">
+            <input type="range" min="0" max="10" step="0.1" value="6.0" class="range-chalk" id="range-4" oninput="handleVolt(4)">
+          </div>
+          <div class="range-minmax"><span>0.0V</span><span>10.0V</span></div>
+        </div>
+        <div class="bottom-note" id="note-4">串聯需克服兩者之和（黃 2.1V + 綠 2.2V > 4.3V 皆亮）</div>
+      </div>
+
+      <!-- ==================== 第 6 題（左下角）：橋式整流（粉紅電流流向動態版） ==================== -->
+      <div class="q-box cell-q6">
+        <div class="q-title">【第6題】橋式整流</div>
+        <div class="svg-container">
+          <svg viewBox="0 0 340 180" id="svg6">
+            <text x="50" y="32" class="chalk-txt chalk-txt-sub" text-anchor="middle">點擊切換極性</text>
+            <text x="50" y="46" class="chalk-txt chalk-txt-sub" text-anchor="middle">↔</text>
+
+            <!-- 輸入電源左右導線 -->
+            <path d="M 50 90 L 100 90" class="wire" id="w6-in-left" />
+            <path d="M 180 90 L 200 90" class="wire" id="w6-in-right" />
+
+            <!-- 菱形四邊電橋線段 (拆分供動態粉紅色彩變更) -->
+            <!-- 左上臂 (100,90 -> 140,40) -->
+            <path d="M 100 90 L 140 40" class="wire" id="w6-arm-tl" />
+            <!-- 右上臂 (180,90 -> 140,40) -->
+            <path d="M 180 90 L 140 40" class="wire" id="w6-arm-tr" />
+            <!-- 左下臂 (140,140 -> 100,90) -->
+            <path d="M 140 140 L 100 90" class="wire" id="w6-arm-bl" />
+            <!-- 右下臂 (140,140 -> 180,90) -->
+            <path d="M 140 140 L 180 90" class="wire" id="w6-arm-br" />
+
+            <!-- 上端頂點連接負載線路 -->
+            <path d="M 140 40 L 240 40 L 240 68" class="wire" id="w6-load-top" />
+            <!-- 下端頂點連接負載線路 -->
+            <path d="M 140 140 L 240 140 L 240 118" class="wire" id="w6-load-bottom" />
+
+            <!-- 橋上 4 顆二極體 -->
+            <!-- 1. 左上臂 -->
+            <polygon points="127,57 116,66 125,74" fill="#ffffff" stroke="#ffffff" stroke-width="1.2" id="d6-tl" />
+            <line x1="120" y1="52" x2="134" y2="62" stroke="#ffffff" stroke-width="2.2" />
+
+            <!-- 2. 右上臂 -->
+            <polygon points="153,57 155,74 164,66" fill="#ffffff" stroke="#ffffff" stroke-width="1.2" id="d6-tr" />
+            <line x1="146" y1="62" x2="160" y2="52" stroke="#ffffff" stroke-width="2.2" />
+
+            <!-- 3. 左下臂 -->
+            <polygon points="113,107 122,124 131,116" fill="#ffffff" stroke="#ffffff" stroke-width="1.2" id="d6-bl" />
+            <line x1="106" y1="112" x2="120" y2="102" stroke="#ffffff" stroke-width="2.2" />
+
+            <!-- 4. 右下臂 -->
+            <polygon points="167,107 149,116 158,124" fill="#ffffff" stroke="#ffffff" stroke-width="1.2" id="d6-br" />
+            <line x1="160" y1="102" x2="174" y2="112" stroke="#ffffff" stroke-width="2.2" />
+
+            <!-- 負載 LED -->
+            <line x1="240" y1="68" x2="240" y2="80" class="wire" id="w6-led-lead-t" />
+            <polygon points="240,104 227,82 253,82" class="led-core" id="led-6-load" fill="#52ff90" />
+            <line x1="227" y1="104" x2="253" y2="104" stroke="#ffffff" stroke-width="2.4" />
+            <line x1="240" y1="104" x2="240" y2="118" class="wire" id="w6-led-lead-b" />
+
+            <text x="256" y="76" class="chalk-pin">長</text>
+            <text x="256" y="112" class="chalk-pin">短</text>
+
+            <path d="M 256 86 L 266 78" stroke="#52ff90" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M 260 92 L 270 84" stroke="#52ff90" stroke-width="1.5" stroke-linecap="round" />
+
+            <!-- 輸入端點 -->
+            <g class="pol-btn-group" onclick="togglePolarity(6)">
+              <circle cx="50" cy="90" r="16" class="pol-circle" />
+              <text x="50" y="90" class="pol-text" id="pol-6-left">＋</text>
+            </g>
+
+            <g class="pol-btn-group" onclick="togglePolarity(6)">
+              <circle cx="200" cy="90" r="14" class="pol-circle" />
+              <text x="200" y="90" class="pol-text" id="pol-6-right" font-size="13">－</text>
+            </g>
+          </svg>
+        </div>
+        <div class="slider-wrap">
+          <div class="volt-num" id="val-6">6.0V</div>
+          <div class="slider-inner">
+            <input type="range" min="0" max="10" step="0.1" value="6.0" class="range-chalk" id="range-6" oninput="handleVolt(6)">
+          </div>
+          <div class="range-minmax"><span>0.0V</span><span>10.0V</span></div>
+        </div>
+        <div class="bottom-note" id="note-6">無論改變極性，負載燈均恆亮！</div>
+      </div>
+
+    </div>
+
+    <!-- ==================== 延伸學習區 ==================== -->
+    <div class="extension-section">
+      <div class="ext-header">
+        <span class="sparkle">✦</span>
+        <div class="ext-title">延伸學習專區</div>
+        <span class="sparkle">✦</span>
+      </div>
+
+      <!-- 入門補充：實體 LED 與符號銜接對照 -->
+      <div class="intro-banner">
+        <div class="intro-title">
+          <span>📌</span> 入門補充：實體 LED 與電子學符號銜接對照
+        </div>
+        <div class="intro-body">
+          <div class="intro-svg-box">
+            <svg viewBox="0 0 280 200" style="width:100%; height:100%; max-width:280px;">
+              <!-- 左側：實體 LED -->
+              <g>
+                <path d="M 45 75 L 45 40 A 25 25 0 0 1 95 40 L 95 75 Z" fill="#d32f2f" stroke="#ffffff" stroke-width="1.5" opacity="0.9" />
+                <rect x="42" y="75" width="56" height="8" rx="2" fill="#b71c1c" stroke="#ffffff" stroke-width="1.5" />
+                <rect x="58" y="50" width="8" height="15" fill="#ffebee" opacity="0.6" />
+                <polygon points="72,52 82,52 80,62 74,62" fill="#ffebee" opacity="0.6" />
+                <line x1="58" y1="83" x2="58" y2="185" stroke="#e0e0e0" stroke-width="3" stroke-linecap="round" />
+                <line x1="82" y1="83" x2="82" y2="150" stroke="#e0e0e0" stroke-width="3" stroke-linecap="round" />
+                <text x="58" y="198" fill="#52ff90" font-size="11" font-weight="bold" text-anchor="middle">長(+)</text>
+                <text x="82" y="163" fill="#ffab40" font-size="11" font-weight="bold" text-anchor="middle">短(-)</text>
+                <text x="70" y="20" fill="#f5f8f6" font-size="12" font-weight="bold" text-anchor="middle">實體 LED</text>
+              </g>
+
+              <path d="M 115 90 L 140 90" stroke="#fff566" stroke-width="2" stroke-dasharray="3,3" />
+              <polygon points="144,90 136,86 136,94" fill="#fff566" />
+
+              <!-- 右側：符號透視對照 -->
+              <g>
+                <path d="M 185 75 L 185 40 A 25 25 0 0 1 235 40 L 235 75 Z" fill="none" stroke="#f5f8f6" stroke-width="2" />
+                <rect x="182" y="75" width="56" height="8" rx="2" fill="none" stroke="#f5f8f6" stroke-width="2" />
+                <line x1="198" y1="185" x2="198" y2="60" stroke="#f5f8f6" stroke-width="2.5" />
+                <line x1="198" y1="60" x2="206" y2="60" stroke="#f5f8f6" stroke-width="2.5" />
+                <line x1="222" y1="150" x2="222" y2="60" stroke="#f5f8f6" stroke-width="2.5" />
+                <line x1="222" y1="60" x2="218" y2="60" stroke="#f5f8f6" stroke-width="2.5" />
+
+                <polygon points="218,60 206,52 206,68" fill="#52ff90" stroke="#ffffff" stroke-width="1.5" />
+                <line x1="218" y1="50" x2="218" y2="70" stroke="#ffffff" stroke-width="2.5" />
+
+                <text x="198" y="198" fill="#52ff90" font-size="11" font-weight="bold" text-anchor="middle">長(+)</text>
+                <text x="222" y="163" fill="#ffab40" font-size="11" font-weight="bold" text-anchor="middle">短(-)</text>
+                <text x="210" y="20" fill="#f5f8f6" font-size="12" font-weight="bold" text-anchor="middle">符號透視對照</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="intro-text-box">
+            • <span class="intro-highlight">引腳極性判別</span>：未剪腳的全新 LED，<b>長腳為正極（陽極 ＋）</b>，<b>短腳為負極（陰極 －）</b>；若引腳已被剪平，可觀察外殼邊緣有<b>缺角切平邊的一側為負極（－）</b>。<br>
+            • <span class="intro-highlight">電子學符號對應</span>：二極體符號的大三角形底面接「<b>長腳（＋）</b>」，尖端與垂直擋棒接「<b>短腳（－）</b>」。<br>
+            • <span class="intro-highlight">單向導電口訣</span>：三角形就像箭頭「<b>▶</b>」，代表電流只能<b>從長腳（＋）往短腳（－）單向通行</b>，反向則會被直棒擋住無法導通！
+          </div>
+        </div>
+      </div>
+
+      <!-- 下方雙卡片 -->
+      <div class="ext-grid">
+        <!-- 觀念 1：為什麼看電流不看電壓 -->
+        <div class="ext-card">
+          <div class="ext-card-title">💡 觀念 1：LED 會不會燒掉，取決於「電流」而非「電壓」</div>
+          <div class="ext-content">
+            • <b>非線性特性</b>：LED 達到導通門檻（Vf）後，電壓只要微增 0.2V，電流就會呈<b>指數級暴增</b>！<br>
+            • <b>燒毀機制</b>：一般 5mm LED 安全工作電流僅約 <span class="ext-danger">20 mA (0.02 A)</span>。若直接硬接 10V 電源，瞬間數百毫安培電流產生的強烈高溫會立刻將半導體晶片<b>燒融斷路</b>！<br>
+            • <b>生活比喻</b>：電壓像「水壓高低」，電流像「水流量」。水管會被沖破，是因為<b>通過的水流量太大</b>！
+          </div>
+        </div>
+
+        <!-- 觀念 2：I-V 特性曲線圖與限流電阻計算 -->
+        <div class="ext-card">
+          <div class="ext-card-title">🛡️ 觀念 2：I-V 特性曲線與限流電阻安全機制</div>
+          <div class="ext-content">
+            • <b>各色 LED 導通門檻對照（I-V 圖）</b>：
+            
+            <!-- I-V 曲線圖 -->
+            <div class="iv-graph-box">
+              <svg viewBox="0 0 320 160">
+                <!-- 坐標軸 -->
+                <line x1="35" y1="135" x2="305" y2="135" stroke="#f5f8f6" stroke-width="1.8" />
+                <line x1="35" y1="135" x2="35" y2="15" stroke="#f5f8f6" stroke-width="1.8" />
+                <text x="305" y="148" fill="#cfd8dc" font-size="11">電壓 V</text>
+                <text x="12" y="22" fill="#cfd8dc" font-size="11">電流 I</text>
+
+                <!-- 20mA 安全上限虛線 -->
+                <line x1="35" y1="50" x2="295" y2="50" stroke="#ff4d6d" stroke-width="1.2" stroke-dasharray="3,3" />
+                <text x="40" y="44" fill="#ff4d6d" font-size="10">20mA 安全電流上限</text>
+
+                <!-- 紅燈曲線 (約2.0V導通) -->
+                <path d="M 35 135 L 110 135 Q 125 133 130 90 L 138 25" fill="none" stroke="#ff4d6d" stroke-width="2.4" />
+                <line x1="120" y1="135" x2="120" y2="138" stroke="#ff4d6d" stroke-width="1.5" />
+                <text x="115" y="150" fill="#ff4d6d" font-size="10" font-weight="bold">紅≈2.0V</text>
+
+                <!-- 綠燈曲線 (約2.2V導通) -->
+                <path d="M 35 135 L 140 135 Q 155 133 160 90 L 168 25" fill="none" stroke="#52ff90" stroke-width="2.4" />
+                <line x1="150" y1="135" x2="150" y2="138" stroke="#52ff90" stroke-width="1.5" />
+                <text x="150" y="150" fill="#52ff90" font-size="10" font-weight="bold">綠≈2.2V</text>
+
+                <!-- 藍燈曲線 (約3.0V導通) -->
+                <path d="M 35 135 L 205 135 Q 220 133 225 90 L 233 25" fill="none" stroke="#38d8ff" stroke-width="2.4" />
+                <line x1="215" y1="135" x2="215" y2="138" stroke="#38d8ff" stroke-width="1.5" />
+                <text x="215" y="150" fill="#38d8ff" font-size="10" font-weight="bold">藍≈3.0V</text>
+              </svg>
+            </div>
+
+            • <b>限流電阻計算</b>（以 10V 電源驅動 2.0V 紅燈為例）：
+            <div class="ext-formula-box">
+              R = (V電源 - Vf) ÷ I = (10V - 2.0V) ÷ 0.02A = 400 Ω
+            </div>
+            <div class="ext-tip">※ 只要串聯一顆約 390Ω ~ 470Ω 的電阻，即使電源是 10V，LED 都能安全明亮發光而不燒毀！</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const polarities = {
+    1: true,  // 左+ 右-
+    2: true,  // 左+ 右-
+    3: true,  // 左+ 右-
+    4: true,  // 預設右+ 左- (朝左導通)
+    5: false, // 預設左- 右+ (A燈亮)
+    6: true   // 中間輸入：左+ 右-
+  };
+
+  function togglePolarity(q) {
+    polarities[q] = !polarities[q];
+    updatePolarityUI(q);
+    refreshCircuit(q);
+  }
+
+  function updatePolarityUI(q) {
+    const isNormal = polarities[q];
+    if (q === 6) {
+      document.getElementById('pol-6-left').textContent = isNormal ? '＋' : '－';
+      document.getElementById('pol-6-right').textContent = isNormal ? '－' : '＋';
+    } else if (q === 4) {
+      document.getElementById('pol-4-left').textContent = isNormal ? '－' : '＋';
+      document.getElementById('pol-4-right').textContent = isNormal ? '＋' : '－';
+    } else {
+      document.getElementById(`pol-${q}-left`).textContent = isNormal ? '＋' : '－';
+      document.getElementById(`pol-${q}-right`).textContent = isNormal ? '－' : '＋';
+    }
+  }
+
+  function handleVolt(q) {
+    const v = parseFloat(document.getElementById(`range-${q}`).value);
+    document.getElementById(`val-${q}`).textContent = v.toFixed(1) + 'V';
+    refreshCircuit(q);
+  }
+
+  function setLight(id, glowClass, isOn) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('glow-red', 'glow-blue', 'glow-yellow', 'glow-green', 'led-off');
+    if (isOn) {
+      el.classList.add(glowClass);
+    } else {
+      el.classList.add('led-off');
+    }
+  }
+
+  function refreshCircuit(q) {
+    const v = parseFloat(document.getElementById(`range-${q}`).value);
+    const p = polarities[q];
+
+    switch(q) {
+      case 1: {
+        const redOn = p && (v >= 2.0);
+        const blueOn = false;
+        setLight('led-1-red', 'glow-red', redOn);
+        setLight('led-1-blue', 'glow-blue', blueOn);
+        const note = document.getElementById('note-1');
+        if (!p) note.textContent = '極性反接：兩燈截止不亮';
+        else if (v < 2.0) note.textContent = '電壓不足 (未達紅燈 2.0V 門檻)';
+        else note.textContent = '僅紅燈亮（紅燈箝位使藍燈不亮）';
+        break;
+      }
+
+      case 2: {
+        const bothOn = p && (v >= 5.0);
+        setLight('led-2-red', 'glow-red', bothOn);
+        setLight('led-2-blue', 'glow-blue', bothOn);
+        const note = document.getElementById('note-2');
+        if (!p) note.textContent = '極性反接：串聯截止均不亮';
+        else if (v < 5.0) note.textContent = `電壓不足 (${v.toFixed(1)}V < 5.0V 門檻)`;
+        else note.textContent = '藍、紅皆亮（若電壓夠高）';
+        break;
+      }
+
+      case 3: {
+        const yOn = p && (v >= 2.1);
+        const gOn = p && (v >= 2.2);
+        setLight('led-3-yellow', 'glow-yellow', yOn);
+        setLight('led-3-green', 'glow-green', gOn);
+        const note = document.getElementById('note-3');
+        if (!p) {
+          note.textContent = '極性反接：兩燈均截止不亮';
+        } else if (v < 2.1) {
+          note.textContent = '電壓不足（黃需 > 2.1V、綠需 > 2.2V）';
+        } else if (v < 2.2) {
+          note.textContent = '電壓 > 2.1V（僅黃燈亮，綠燈未達 2.2V）';
+        } else {
+          note.textContent = '黃燈需 > 2.1V、綠燈需 > 2.2V（皆跨過門檻發光）';
+        }
+        break;
+      }
+
+      case 4: {
+        const bothOn = p && (v >= 4.3);
+        setLight('led-4-yellow', 'glow-yellow', bothOn);
+        setLight('led-4-green', 'glow-green', bothOn);
+        const note = document.getElementById('note-4');
+        if (!p) {
+          note.textContent = '極性反接：串聯截止全滅';
+        } else if (v < 4.3) {
+          note.textContent = `電壓不足（需 > 4.3V 總門檻：黃 2.1V + 綠 2.2V）`;
+        } else {
+          note.textContent = '串聯需克服兩者之和（黃 2.1V + 綠 2.2V > 4.3V 皆亮）';
+        }
+        break;
+      }
+
+      case 5: {
+        const aOn = (!p) && (v >= 2.0);
+        const bRealOn = p && (v >= 2.2);
+        setLight('led-5-a', 'glow-red', aOn);
+        setLight('led-5-b', 'glow-green', bRealOn);
+        const note = document.getElementById('note-5');
+        if (!p) {
+          if (v < 2.0) {
+            note.textContent = '右+左-：電壓不足（紅燈需 > 2.0V 導通）';
+          } else {
+            note.textContent = 'A燈(紅)順向亮、B燈逆向截止（紅需 > 2.0V）';
+          }
+        } else {
+          if (v < 2.2) {
+            note.textContent = '左+右-：電壓不足（綠燈需 > 2.2V 導通）';
+          } else {
+            note.textContent = 'B燈(綠)順向亮、A燈逆向截止（綠需 > 2.2V）';
+          }
+        }
+        break;
+      }
+
+      case 6: { // 第 6 題：橋式整流（粉紅色電流流向高亮）
+        const on = (v >= 2.2);
+        setLight('led-6-load', 'glow-green', on);
+        const note = document.getElementById('note-6');
+        
+        // 取得導線節點
+        const inL = document.getElementById('w6-in-left');
+        const inR = document.getElementById('w6-in-right');
+        const armTL = document.getElementById('w6-arm-tl');
+        const armTR = document.getElementById('w6-arm-tr');
+        const armBL = document.getElementById('w6-arm-bl');
+        const armBR = document.getElementById('w6-arm-br');
+        const loadT = document.getElementById('w6-load-top');
+        const loadB = document.getElementById('w6-load-bottom');
+        const leadT = document.getElementById('w6-led-lead-t');
+        const leadB = document.getElementById('w6-led-lead-b');
+
+        // 先全部清空粉紅高亮
+        const allWires = [inL, inR, armTL, armTR, armBL, armBR, loadT, loadB, leadT, leadB];
+        allWires.forEach(w => w.classList.remove('wire-current-pink'));
+
+        if (v < 2.2) {
+          note.textContent = `電壓不足 (${v.toFixed(1)}V < 2.2V 綠燈門檻)`;
+        } else {
+          note.textContent = '粉紅線為電流路徑：負載電流方向永遠向下恆亮！';
+          // 導通時依極性將通過電流的導線染成粉紅色
+          if (p) {
+            // 正接：左端(+) -> 左上臂 -> 頂部 -> 負載 -> 底部 -> 右下臂 -> 右端(-)
+            [inL, armTL, loadT, leadT, leadB, loadB, armBR, inR].forEach(w => w.classList.add('wire-current-pink'));
+          } else {
+            // 反接：右端(+) -> 右上臂 -> 頂部 -> 負載 -> 底部 -> 左下臂 -> 左端(-)
+            [inR, armTR, loadT, leadT, leadB, loadB, armBL, inL].forEach(w => w.classList.add('wire-current-pink'));
+          }
+        }
+        break;
+      }
+    }
+  }
+
+  for (let i = 1; i <= 6; i++) {
+    updatePolarityUI(i);
+    refreshCircuit(i);
+  }
+</script>
+
+</body>
+</html>
