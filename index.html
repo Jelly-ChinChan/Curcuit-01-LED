@@ -64,6 +64,7 @@
       box-shadow: inset 0 0 80px rgba(0,0,0,0.75);
     }
 
+    /* 頂部主標題：橘色 + 紫色 */
     .board-header {
       text-align: center;
       margin-bottom: 14px;
@@ -405,6 +406,10 @@
       font-weight: 700;
     }
 
+    .nowrap {
+      white-space: nowrap;
+    }
+
     .ext-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -461,17 +466,21 @@
       padding: 4px;
     }
 
+    /* 關鍵優化：算式自適應縮放、絕不折行、居中對齊 */
     .ext-formula-box {
       background: rgba(0,0,0,0.3);
       border: 1px solid rgba(255,255,255,0.2);
       border-radius: 6px;
-      padding: 8px 10px;
+      padding: 8px 6px;
       margin-top: 4px;
       text-align: center;
       font-family: 'Caveat', cursive, sans-serif;
-      font-size: 1.2rem;
+      font-size: clamp(0.95rem, 3.5vw, 1.25rem);
       color: var(--chalk-yellow);
       letter-spacing: 0.5px;
+      white-space: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
     }
 
     .ext-tip {
@@ -637,7 +646,7 @@
       <!-- 分隔線 -->
       <div class="grid-h-line"></div>
 
-      <!-- ==================== 第 2 題（右下角）：串聯紅藍 LED（改為 5V (紅需 2V + 藍需 3V)） ==================== -->
+      <!-- ==================== 第 2 題（右下角）：串聯紅藍 LED ==================== -->
       <div class="q-box cell-q2">
         <div class="q-title">【第2題】串聯紅藍 LED</div>
         <div class="svg-container">
@@ -725,7 +734,7 @@
         <div class="bottom-note" id="note-4">串聯需克服兩者之和（黃 2.1V + 綠 2.2V > 4.3V 皆亮）</div>
       </div>
 
-      <!-- ==================== 第 6 題（左下角）：橋式整流（改為 3.6V (2.2V + 0.7×2 V) 導通） ==================== -->
+      <!-- ==================== 第 6 題（左下角）：橋式整流 ==================== -->
       <div class="q-box cell-q6">
         <div class="q-title">【第6題】橋式整流</div>
         <div class="svg-container">
@@ -733,34 +742,27 @@
             <text x="50" y="32" class="chalk-txt chalk-txt-sub" text-anchor="middle">點擊切換極性</text>
             <text x="50" y="46" class="chalk-txt chalk-txt-sub" text-anchor="middle">↔</text>
 
-            <!-- 輸入電源左右導線 -->
             <path d="M 50 90 L 100 90" class="wire" id="w6-in-left" />
             <path d="M 180 90 L 200 90" class="wire" id="w6-in-right" />
 
-            <!-- 菱形四邊電橋線段 -->
             <path d="M 100 90 L 140 40" class="wire" id="w6-arm-tl" />
             <path d="M 180 90 L 140 40" class="wire" id="w6-arm-tr" />
             <path d="M 140 140 L 100 90" class="wire" id="w6-arm-bl" />
             <path d="M 140 140 L 180 90" class="wire" id="w6-arm-br" />
 
-            <!-- 上下端連接負載線路 -->
             <path d="M 140 40 L 240 40 L 240 68" class="wire" id="w6-load-top" />
             <path d="M 140 140 L 240 140 L 240 118" class="wire" id="w6-load-bottom" />
 
             <!-- 橋上 4 顆二極體 -->
-            <!-- 1. 左上臂 -->
             <polygon points="127,57 116,66 125,74" fill="#ffffff" stroke="#ffffff" stroke-width="1.2" id="d6-tl" />
             <line x1="120" y1="52" x2="134" y2="62" stroke="#ffffff" stroke-width="2.2" />
 
-            <!-- 2. 右上臂 -->
             <polygon points="153,57 155,74 164,66" fill="#ffffff" stroke="#ffffff" stroke-width="1.2" id="d6-tr" />
             <line x1="146" y1="62" x2="160" y2="52" stroke="#ffffff" stroke-width="2.2" />
 
-            <!-- 3. 左下臂 -->
             <polygon points="113,107 122,124 131,116" fill="#ffffff" stroke="#ffffff" stroke-width="1.2" id="d6-bl" />
             <line x1="106" y1="112" x2="120" y2="102" stroke="#ffffff" stroke-width="2.2" />
 
-            <!-- 4. 右下臂 -->
             <polygon points="167,107 149,116 158,124" fill="#ffffff" stroke="#ffffff" stroke-width="1.2" id="d6-br" />
             <line x1="160" y1="102" x2="174" y2="112" stroke="#ffffff" stroke-width="2.2" />
 
@@ -859,14 +861,14 @@
         </div>
       </div>
 
-      <!-- 三大核心觀念卡片 (觀念1、觀念2、新增觀念3) -->
+      <!-- 三大核心觀念卡片 (已優化斷行排版) -->
       <div class="ext-grid">
         <!-- 觀念 1：為什麼看電流不看電壓 -->
         <div class="ext-card">
           <div class="ext-card-title">💡 觀念 1：LED 燒毀取決於「電流」</div>
           <div class="ext-content">
-            • <b>非線性暴增</b>：LED 跨壓超過導通門檻後，電壓只要微增 0.2V，電流就會<b>指數級暴增</b>！<br>
-            • <b>安全工作電流</b>：一般 5mm LED 安全工作電流上限僅約 <span class="ext-danger">20 mA (0.02 A)</span>。若直接硬接高電壓，瞬間數百毫安培電流產生的強烈焦耳熱會立刻將半導體晶片<b>燒融斷路</b>！<br>
+            • <b>非線性暴增</b>：LED 跨壓超過導通門檻後，電壓只要微增 0.2V，電流就會呈<b>指數級暴增</b>！<br>
+            • <b>安全工作電流</b>：一般 5mm LED 安全工作電流上限僅約 <span class="ext-danger nowrap">20 mA (0.02 A)</span>。若直接硬接高電壓，瞬間數百毫安培電流產生的強烈焦耳熱會立刻將半導體晶片<b>燒融斷路</b>！<br>
             • <b>生活比喻</b>：電壓像「水壓高低」，電流像「水流量」。水管會被沖破，是因為<b>水流量太巨大</b>！
           </div>
         </div>
@@ -908,24 +910,24 @@
             <div class="ext-formula-box">
               R = (10V - 2.0V) ÷ 0.02A = 400 Ω
             </div>
-            <div class="ext-tip">※ 只要串聯約 400Ω 限流電阻，即使接 10V 電源，LED 也能安全發光而不燒毀！</div>
+            <div class="ext-tip">※ 只要串聯約 400Ω 限流電阻，即使接 10V 電源也能安全發光！</div>
           </div>
         </div>
 
-        <!-- 觀念 3：二極體的 0.7V 壓降原理與橋式門檻 -->
+        <!-- 觀念 3：二極體的 0.7V 壓降原理與橋式門檻 (已消除斷行孤字) -->
         <div class="ext-card">
           <div class="ext-card-title">⚡ 觀念 3：二極體的 0.7V 壓降原理</div>
           <div class="ext-content">
-            • <b>PN 接面電位障壁</b>：二極體由 P 型與 N 型半導體結合而成。交界處自然形成內建電場，矽（Si）二極體要順向導通，必須先跨越約 <span class="intro-highlight">0.7 V</span> 的障壁電壓！<br>
+            • <b>PN 接面電位障壁</b>：二極體由 P 型與 N 型半導體組成。交界處自然形成內建電場，矽（Si）二極體要順向導通，必須先跨越約 <span class="intro-highlight nowrap">0.7V</span> 的障壁電壓！<br>
             • <b>一般二極體 vs LED</b>：<br>
-            　- 矽整流二極體（不發光）：導通壓降約 <b>0.7 V</b>。<br>
-            　- 發光二極體（LED）：使用特定化合物半導體，能隙較大，導通壓降約在 <b>2.0 V ~ 3.2 V</b>。<br>
+            　- 矽整流二極體（不發光）：導通壓降約 <span class="nowrap">0.7V</span>。<br>
+            　- 發光二極體（LED）：能隙較大，導通壓降約 <span class="nowrap">2.0V ~ 3.2V</span>。<br>
             • <b>第 6 題橋式整流門檻計算</b>：<br>
-            　電流流過電橋時，必定依序流經「<b>2 顆整流二極體 ＋ 1 顆負載綠燈 LED</b>」：
-            <div class="ext-formula-box" style="font-size: 1.1rem;">
-              V門檻 = 2.2V(綠燈) + (0.7V × 2) = 3.6 V
+            　電流流過電橋時，必定依序流經「<b>2顆整流二極體 ＋ 1顆負載綠燈</b>」：
+            <div class="ext-formula-box">
+              V門檻 = 2.2V(綠燈) + (0.7V × 2) = 3.6V
             </div>
-            <div class="ext-tip">※ 電源必須大於 3.6V，克服電橋與負載的總壓降，整流電路才能點亮負載燈！</div>
+            <div class="ext-tip">※ 電源需大於 3.6V 克服電橋總壓降，整流電路才能點亮負載燈！</div>
           </div>
         </div>
       </div>
@@ -998,7 +1000,7 @@
         break;
       }
 
-      case 2: { // 第 2 題：需 > 5V (紅需 2V + 藍需 3V)
+      case 2: {
         const bothOn = p && (v >= 5.0);
         setLight('led-2-red', 'glow-red', bothOn);
         setLight('led-2-blue', 'glow-blue', bothOn);
@@ -1064,7 +1066,7 @@
         break;
       }
 
-      case 6: { // 第 6 題：改為 3.6V (2.2V + 0.7×2 V) 導通
+      case 6: {
         const on = (v >= 3.6);
         setLight('led-6-load', 'glow-green', on);
         const note = document.getElementById('note-6');
